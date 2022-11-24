@@ -1,9 +1,10 @@
-# Name:
-# OSU Email:
+# Name: Brittaney Nico Davis
+# OSU Email: davisbr2@oregonstate.edu
 # Course: CS261 - Data Structures
-# Assignment:
-# Due Date:
-# Description:
+# Assignment: Assignment 6
+# Due Date: 12/2/2022  (However I requested 2 extra days, so 12/4/2022)
+# Description: A hashmap using opening addressing, with a
+#              dynamic array and linked list.
 
 from a6_include import (DynamicArray, DynamicArrayException, HashEntry,
                         hash_function_1, hash_function_2)
@@ -87,19 +88,17 @@ class HashMap:
 
     def put(self, key: str, value: object) -> None:
         """
-        TODO: Write this implementation
         """
+
         pass
 
     def table_load(self) -> float:
         """
-        TODO: Write this implementation
         """
         pass
 
     def empty_buckets(self) -> int:
         """
-        TODO: Write this implementation
         """
         pass
 
@@ -107,36 +106,36 @@ class HashMap:
         """
         TODO: Write this implementation
         """
+
         pass
 
     def get(self, key: str) -> object:
         """
-        TODO: Write this implementation
         """
+
         pass
 
     def contains_key(self, key: str) -> bool:
         """
-        TODO: Write this implementation
         """
+
         pass
 
     def remove(self, key: str) -> None:
         """
-        TODO: Write this implementation
         """
+
         pass
 
     def clear(self) -> None:
         """
-        TODO: Write this implementation
         """
         pass
 
     def get_keys_and_values(self) -> DynamicArray:
         """
-        TODO: Write this implementation
         """
+
         pass
 
     def __iter__(self):

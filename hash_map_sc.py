@@ -1,9 +1,10 @@
-# Name:
-# OSU Email:
+# Name: Brittaney Nico Davis
+# OSU Email: davisbr2@oregonstate.edu
 # Course: CS261 - Data Structures
-# Assignment:
-# Due Date:
-# Description:
+# Assignment: Assignment 6
+# Due Date: 12/2/2022 (However I requested 2 extra days, so 12/4/2022)
+# Description: A hashmap using chaining, with a dynamic array
+#              and linked list.
 
 
 from a6_include import (DynamicArray, LinkedList,
@@ -90,25 +91,49 @@ class HashMap:
 
     def put(self, key: str, value: object) -> None:
         """
-        TODO: Write this implementation
+        A function which updates a key/value
+        pair in the hash table. When the key passed
+        already exists in the hashmap, the
+        associated value is replaced with the
+        new value passed. If the key is not
+        present in the hash table, it must be added.
         """
+
+        # For this hash map implementation, the table must be resized to double its current
+        # capacity when this method is called and the current load factor of the table is
+        # greater than or equal to 1.0.
+
+
+
         pass
 
     def empty_buckets(self) -> int:
         """
-        TODO: Write this implementation
+        A function which returns the number
+        of empty buckets in the hash table.
         """
         pass
 
     def table_load(self) -> float:
         """
-        TODO: Write this implementation
+        A function which returns the
+        hash table load factor.
         """
+
+        load_factor = self._buckets / self._size
+
+        # load_factor = n/m
+        # where n is the number of elements stored in the table
+        # m is the number of buckets total
+
         pass
 
     def clear(self) -> None:
         """
-        TODO: Write this implementation
+        A function that clears all contents
+        in the hash table without
+        modifying the underlying hash
+        table capacity.
         """
         pass
 
@@ -116,29 +141,51 @@ class HashMap:
         """
         TODO: Write this implementation
         """
+
+        # This method changes the capacity of the internal hash table. All existing key/value pairs
+        # must remain in the new hash map, and all hash table links must be rehashed.
+        # First check that new_capacity is not less than 1; if so, the method does nothing.
+        # If new_capacity is 1 or more, make sure it is a prime number. If not, change it to the next
+        # highest prime number.
+
+        # You may use the methods _is_prime() and _next_prime() from the
+        # skeleton code.
+
         pass
 
     def get(self, key: str):
         """
-        TODO: Write this implementation
+        A function that returns the value
+        associated with the passed key. If
+        that value is not in the hash table,
+        the function returns None.
         """
         pass
 
     def contains_key(self, key: str) -> bool:
         """
-        TODO: Write this implementation
+        A function that returns True or False,
+        depending upon whether the passed
+        key is in the hash table. An empty
+        hash table will not contain any keys.
         """
         pass
 
     def remove(self, key: str) -> None:
         """
-        TODO: Write this implementation
+        A function which removes the passed
+        key from the hash table as well as the
+        associated value. If the key does not
+        exist in the hash table, nothing occurs.
         """
         pass
 
     def get_keys_and_values(self) -> DynamicArray:
         """
-        TODO: Write this implementation
+        A function that returns a dynamic array
+        in which each index contains a tuple
+        of key/value pairs within the hash
+        table. Order does not matter.
         """
         pass
 
@@ -150,6 +197,19 @@ def find_mode(da: DynamicArray) -> (DynamicArray, int):
     # if you'd like to use a hash map,
     # use this instance of your Separate Chaining HashMap
     map = HashMap()
+
+    # Write a standalone function outside the HashMap class that receives a dynamic array
+    # (that is not guaranteed to be sorted). This function will return a tuple containing, in this
+    # order, a dynamic array comprising the mode (most occurring) value/s of the array, and an
+    # integer that represents the highest frequency (how many times they appear).
+    # If there is more than one value with the highest frequency, all values at that frequency
+    # should be included in the array being returned (the order does not matter). If there is only
+    # one mode, the dynamic array will only contain that value.
+    # You may assume that the input array will contain at least one element, and that all values
+    # stored in the array will be strings. You do not need to write checks for these conditions.
+    # For full credit, the function must be implemented with O(N) time complexity. For best
+    # results, we recommend using the separate chaining hash map provided for you in the
+    # function’s skeleton code.
 
 
 # ------------------- BASIC TESTING ---------------------------------------- #
