@@ -262,10 +262,9 @@ class HashMap:
         da = DynamicArray()
 
         for i in range(self._buckets.length()):
-            node_to_add = self._buckets[i]
-            if node_to_add.length() > 0:
-                for j in range(node_to_add.length()):
-                    da.append((j.key, j.value))
+            buckets = self._buckets[i]
+            for j in buckets:
+                da.append((j.key, j.value))
         return da
 
 def find_mode(da: DynamicArray) -> (DynamicArray, int):
