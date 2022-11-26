@@ -99,20 +99,38 @@ class HashMap:
         present in the hash table, it must be added.
         """
 
-        # For this hash map implementation, the table must be resized to double its current
-        # capacity when this method is called and the current load factor of the table is
-        # greater than or equal to 1.0.
+        hash_function = self._hash_function(key)
+        hash_index = hash_function % self._capacity
 
+        if self.table_load() >= 1:
+            new_capacity = self._capacity * 2
+            self.resize_table(new_capacity)
 
+        if self._buckets.get_at_index(hash_index).contains(key) is not None:
+            self._buckets.get_at_index(hash_index).remove(key)
+            self._buckets.get_at_index(hash_index).insert(key, value)
 
-        pass
+            self._size = self._size - 1
+
+        elif self._buckets.get_at_index(hash_index).contains(key) is None:
+            self._buckets.get_at_index(hash_index).insert(key, value)
+
+        self._size = self._size + 1
 
     def empty_buckets(self) -> int:
         """
         A function which returns the number
         of empty buckets in the hash table.
         """
-        pass
+
+        empty_count = 0
+        hash_capacity = self._capacity
+
+        for i in range(hash_capacity):
+            if self._buckets.get_at_index(i).length() == 0:
+                empty_count += 1
+
+        return empty_count
 
     def table_load(self) -> float:
         """
@@ -120,13 +138,9 @@ class HashMap:
         hash table load factor.
         """
 
-        load_factor = self._buckets / self._size
+        # Return the size divided by the capacity for the load factor.
 
-        # load_factor = n/m
-        # where n is the number of elements stored in the table
-        # m is the number of buckets total
-
-        pass
+        return self._size / self._capacity
 
     def clear(self) -> None:
         """
@@ -135,23 +149,53 @@ class HashMap:
         modifying the underlying hash
         table capacity.
         """
-        pass
+
+        # Simply set the buckets to a new dynamic array to clear.
+
+        self._buckets = DynamicArray()
 
     def resize_table(self, new_capacity: int) -> None:
         """
-        TODO: Write this implementation
+        A function that alters the capacity
+        of the hash table. The key/value
+        pairs and links within must be
+        maintained via rehashing. Capacity
+        must be adjusted depending upon
+        whether it is greater than or equal
+        to one. If less than 1, nothing
+        occurs.
         """
 
-        # This method changes the capacity of the internal hash table. All existing key/value pairs
-        # must remain in the new hash map, and all hash table links must be rehashed.
-        # First check that new_capacity is not less than 1; if so, the method does nothing.
-        # If new_capacity is 1 or more, make sure it is a prime number. If not, change it to the next
-        # highest prime number.
+        ll = LinkedList()
+        da = DynamicArray()
 
-        # You may use the methods _is_prime() and _next_prime() from the
-        # skeleton code.
+        if new_capacity < 1:
+            return
 
-        pass
+        elif new_capacity >= 1:
+            if self._is_prime(new_capacity):
+                new_capacity = self._capacity * 2
+            elif not self._is_prime(new_capacity):
+                new_capacity = self._next_prime(new_capacity)
+
+        for i in range(new_capacity):
+            da.append(LinkedList())
+
+        for j in range(self._capacity):
+            node = self._buckets.get_at_index(j)
+
+            if self._buckets.get_at_index(j) is None:
+                continue
+            elif self._buckets.get_at_index(j) is not None:
+                for k in node:
+                    ll.insert(k.key, k.value)
+
+        self._capacity = new_capacity
+        self._buckets = da
+        self._size = 0
+
+        for q in ll:
+            self.put(q.key, q.value)
 
     def get(self, key: str):
         """
@@ -160,7 +204,15 @@ class HashMap:
         that value is not in the hash table,
         the function returns None.
         """
-        pass
+
+        hash_function = self._hash_function(key)
+        hash_index = hash_function % self._capacity
+
+        if not self.contains_key(key):
+            return None
+
+        else:
+            return self._buckets.get_at_index(hash_index).contains(key).value
 
     def contains_key(self, key: str) -> bool:
         """
@@ -169,7 +221,17 @@ class HashMap:
         key is in the hash table. An empty
         hash table will not contain any keys.
         """
-        pass
+
+        hash_function = self._hash_function(key)
+        hash_index = hash_function % self._capacity
+
+        if self._capacity == 0:
+            return False
+
+        if self._buckets.get_at_index(hash_index).contains(key):
+            return True
+        else:
+            return False
 
     def remove(self, key: str) -> None:
         """
@@ -178,7 +240,16 @@ class HashMap:
         associated value. If the key does not
         exist in the hash table, nothing occurs.
         """
-        pass
+
+        hash_function = self._hash_function(key)
+        hash_index = hash_function % self._capacity
+
+        if not self.contains_key(key):
+            return
+
+        if self._buckets.get_at_index(hash_index).contains(key):
+            self._buckets.get_at_index(hash_index).remove(key)
+            self._size -= 1
 
     def get_keys_and_values(self) -> DynamicArray:
         """
@@ -187,8 +258,15 @@ class HashMap:
         of key/value pairs within the hash
         table. Order does not matter.
         """
-        pass
 
+        da = DynamicArray()
+
+        for i in range(self._buckets.length()):
+            node_to_add = self._buckets[i]
+            if node_to_add.length() > 0:
+                for j in range(node_to_add.length()):
+                    da.append((j.key, j.value))
+        return da
 
 def find_mode(da: DynamicArray) -> (DynamicArray, int):
     """
@@ -210,6 +288,8 @@ def find_mode(da: DynamicArray) -> (DynamicArray, int):
     # For full credit, the function must be implemented with O(N) time complexity. For best
     # results, we recommend using the separate chaining hash map provided for you in the
     # function’s skeleton code.
+
+    pass
 
 
 # ------------------- BASIC TESTING ---------------------------------------- #
