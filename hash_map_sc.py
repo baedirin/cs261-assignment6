@@ -99,12 +99,12 @@ class HashMap:
         present in the hash table, it must be added.
         """
 
-        hash_function = self._hash_function(key)
-        hash_index = hash_function % self._capacity
-
         if self.table_load() >= 1:
             new_capacity = self._capacity * 2
             self.resize_table(new_capacity)
+
+        hash_function = self._hash_function(key)
+        hash_index = hash_function % self._capacity
 
         if self._buckets.get_at_index(hash_index).contains(key) is not None:
             self._buckets.get_at_index(hash_index).remove(key)
@@ -172,11 +172,8 @@ class HashMap:
         if new_capacity < 1:
             return
 
-        elif new_capacity >= 1:
-            if self._is_prime(new_capacity):
-                new_capacity = self._capacity * 2
-            elif not self._is_prime(new_capacity):
-                new_capacity = self._next_prime(new_capacity)
+        if not self._is_prime(new_capacity):
+            new_capacity = self._next_prime(new_capacity)
 
         for i in range(new_capacity):
             da.append(LinkedList())
