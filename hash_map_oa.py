@@ -102,45 +102,26 @@ class HashMap:
             new_capacity = self._capacity * 2
             self.resize_table(new_capacity)
 
-        # hash_index = self._hash_function(key) % self.get_capacity()
-        # counter = 0
-        #
-        # while self._buckets[hash_index]:
-        #     if self._buckets[hash_index].key == key or \
-        #             self._buckets[hash_index].is_tombstone is True:
-        #         break
-        #     counter += 1
-        #     index = hash_index
-        #     hash_index = (index + (counter * counter)) % self.get_capacity()
-        #
-        # if self._buckets[hash_index] is None:
-        #     self._buckets[hash_index] = HashEntry(key, value)
-        #     self._size += 1
-        #
-        # elif self._buckets[hash_index] is not None:
-        #     if self._buckets[hash_index].key == key:
-        #         self._buckets[hash_index].value = value
-        #     if self._buckets[hash_index].is_tombstone is True:
-        #         self._buckets[hash_index] = HashEntry(key, value)
-
-        hash_func = self._hash_function(key)
+        probe_counter = 0
         empty = False
-        counter = 0
+        hash_func = self._hash_function(key)
 
         while not empty:
-            quadratic_probe = ((hash_func + (counter * counter)) % self.get_capacity())
+
+            quadratic_probe = ((hash_func + (probe_counter * probe_counter)) % self.get_capacity())
+
             if self._buckets.get_at_index(quadratic_probe) is None:
                 empty = True
                 self._buckets.set_at_index(quadratic_probe, (HashEntry(key, value)))
-                self._size += 1
-            elif self._buckets.get_at_index(quadratic_probe).key == key:
+                self._size = self._size + 1
+
+            if self._buckets.get_at_index(quadratic_probe).key == key:
                 empty = True
-                tombstone = self._buckets.get_at_index(quadratic_probe).is_tombstone
-                if tombstone is True:
-                    self._size += 1
+                if self._buckets.get_at_index(quadratic_probe).is_tombstone is True:
+                    self._size = self._size + 1
                 self._buckets.set_at_index(quadratic_probe, (HashEntry(key, value)))
 
-            counter += 1
+            probe_counter += 1
 
     def table_load(self) -> float:
         """
@@ -181,14 +162,13 @@ class HashMap:
 
         # TODO - comments
 
+        da = DynamicArray
+
         if new_capacity < self._size:
             return
 
-        prime_capacity = self._is_prime(new_capacity)
-        next_prime = self._next_prime(new_capacity)
-
-        if prime_capacity is not True:
-            new_capacity = next_prime
+        if not self._is_prime(new_capacity):
+            new_capacity = self._next_prime(new_capacity)
 
         self._capacity = new_capacity
         buckets = self._buckets
@@ -200,7 +180,7 @@ class HashMap:
 
         for index in range(buckets.length()):
             element = buckets.get_at_index(index)
-            if element is not None:
+            if element is not None and buckets[index].is_tombstone is False:
                 self.put(element.key, element.value)
 
     def get(self, key: str) -> object:
@@ -213,20 +193,27 @@ class HashMap:
 
         # TODO - comments
 
-        # This method returns the value associated with the given key. If the key is not in the hash
-        # map, the method returns None.
-
-        hash_function = self._hash_function(key)
-        hash_index = hash_function % self._capacity
-
         if not self.contains_key(key):
             return None
 
-        if self._buckets[hash_index].is_tombstone is True:
-            return None
-        elif self._buckets[hash_index].is_tombstone is False and \
-                self._buckets[hash_index] is not None:
-            return self._buckets.get_at_index(hash_index)
+        probe_counter = 0
+        empty = False
+        hash_func = self._hash_function(key)
+
+        while not empty:
+
+            quadratic_probe = ((hash_func + (probe_counter * probe_counter)) % self.get_capacity())
+
+            if self._buckets.get_at_index(quadratic_probe) is None or \
+                    self._buckets.get_at_index(quadratic_probe).is_tombstone is True:
+                probe_counter += 1
+                return None
+
+            elif self._buckets.get_at_index(quadratic_probe).key == key:
+                probe_counter += 1
+                return self._buckets.get_at_index(quadratic_probe).value
+
+            probe_counter += 1
 
     def contains_key(self, key: str) -> bool:
         """
@@ -239,22 +226,23 @@ class HashMap:
 
         # TODO - comments
 
-        # This method returns True if the given key is in the hash map, otherwise it returns False. An
-        # empty hash map does not contain any keys.
+        probe_counter = 0
+        empty = False
+        hash_func = self._hash_function(key)
 
-        capacity = self._capacity
+        while not empty:
 
-        if self._capacity == 0:
-            return False
+            quadratic_probe = ((hash_func + (probe_counter * probe_counter)) % self.get_capacity())
 
-        for index in range(capacity):
-            hash_function = self._hash_function(key)
-            hash_index = hash_function % self._capacity
-            if self._buckets.get_at_index(hash_index) == key and\
-                    self._buckets[hash_index].is_tombstone is False:
-                return True
-            else:
+            if self._buckets.get_at_index(quadratic_probe) is None:
+                probe_counter += 1
                 return False
+            if self._buckets.get_at_index(quadratic_probe).key == key and \
+                    self._buckets.get_at_index(quadratic_probe).is_tombstone is False:
+                probe_counter += 1
+                return True
+
+            probe_counter += 1
 
     def remove(self, key: str) -> None:
         """
@@ -267,19 +255,39 @@ class HashMap:
 
         # TODO - comments
 
-        hash_function = self._hash_function(key)
-        hash_index = hash_function % self._capacity
+        # hash_function = self._hash_function(key)
+        # hash_index = hash_function % self._capacity
+        #
+        # if not self.contains_key(key):
+        #     return None
+        #
+        # if self._buckets.get_at_index(hash_index) == key:
+        #     if self._buckets[hash_index].is_tombstone is True:
+        #         return None
+        #     if self._buckets[hash_index].is_tombstone is False:
+        #         self._buckets.set_at_index(hash_index, None)
+        #         self._buckets[hash_index].is_tombstone = True
+        #         self._size -= 1
 
         if not self.contains_key(key):
             return None
 
-        if self._buckets.get_at_index(hash_index) == key:
-            if self._buckets[hash_index].is_tombstone is True:
-                return None
-            if self._buckets[hash_index].is_tombstone is False:
-                self._buckets.set_at_index(hash_index, None)
-                self._buckets[hash_index].is_tombstone = True
+        probe_counter = 0
+        empty = False
+        hash_func = self._hash_function(key)
+
+        while not empty:
+
+            quadratic_probe = ((hash_func + (probe_counter * probe_counter)) % self.get_capacity())
+
+            if self._buckets.get_at_index(quadratic_probe) is None or \
+                    self._buckets.get_at_index(quadratic_probe).is_tombstone is True:
+                continue
+            elif self._buckets.get_at_index(quadratic_probe).key == key:
+                self._buckets.set_at_index(quadratic_probe, None)
                 self._size -= 1
+
+            probe_counter += 1
 
     def clear(self) -> None:
         """
@@ -291,11 +299,10 @@ class HashMap:
 
         # TODO - comments
 
-        da = DynamicArray()
-        capacity = da.length()
+        capacity = self._capacity
 
-        for i in range(0, capacity):
-            self._buckets.set_at_index(i, da)
+        for i in range(capacity):
+            self._buckets.set_at_index(i, self._buckets)
             self._size = 0
 
     def get_keys_and_values(self) -> DynamicArray:
@@ -308,9 +315,6 @@ class HashMap:
         """
 
         # TODO - comments
-
-        # This method returns a dynamic array where each index contains a tuple of a key/value pair
-        # stored in the hash map. The order of the keys in the dynamic array does not matter.
 
         da = DynamicArray()
 
