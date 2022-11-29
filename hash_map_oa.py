@@ -98,32 +98,50 @@ class HashMap:
 
         # TODO - comments
 
-        if self.table_load() >= .5:
+        if self.table_load() >= 0.5:
             new_capacity = self._capacity * 2
             self.resize_table(new_capacity)
 
-        hash_function = self._hash_function(key)
-        hash_index = hash_function % self._capacity
+        hash_index = self._hash_function(key) % self.get_capacity()
+        counter = 0
 
-        # 1. Use the hash function to compute an initial index for the element.
-        # 2. If the hash table array at index initial is empty, insert the element there and stop.
-        # 3. Otherwise, compute the next index i in the probing sequence and repeat.
+        while self._buckets[hash_index]:
+            if self._buckets[hash_index].key == key or \
+                    self._buckets[hash_index].is_tombstone is True:
+                break
+            counter += 1
+            index = hash_index
+            hash_index = (index + (counter * counter)) % self.get_capacity()
 
-        # Quadratic probing:  i = i initial + j^2 % m            (where j = 1, 2, 3, …)
+        if self._buckets[hash_index] is None:
+            self._buckets[hash_index] = HashEntry(key, value)
+            self._size += 1
 
-        for j in range(self._buckets.length()):
-            quadratic_probe = (hash_index + (j * j)) % self._capacity
+        elif self._buckets[hash_index] is not None:
+            if self._buckets[hash_index].key == key:
+                self._buckets[hash_index].value = value
+            if self._buckets[hash_index].is_tombstone is True:
+                self._buckets[hash_index] = HashEntry(key, value)
 
-            if self._buckets.get_at_index(hash_index) is None:
-                self._buckets.set_at_index(hash_index, value)
-                self._size = self._size + 1
-
-            elif self._buckets.get_at_index(hash_index) is not None:
-                if self._buckets[quadratic_probe] is None:
-                    self._buckets.set_at_index(hash_index, value)
-                    self._size = self._size + 1
-                elif self._buckets[quadratic_probe] is not None:
-                    j += 1
+        # hash_func = self._hash_function(key)
+        # empty = False
+        # counter = 0
+        #
+        # while not empty:
+        #     quadratic_probe = ((hash_func + (counter * counter)) % self.get_capacity())
+        #     if self._buckets.get_at_index(quadratic_probe) is None:
+        #         empty = True
+        #         self._buckets.set_at_index(quadratic_probe, (HashEntry(key, value)))
+        #         self._size += 1
+        #     elif self._buckets.get_at_index(quadratic_probe).key == key:
+        #         empty = True
+        #         tombstone = self._buckets.get_at_index(quadratic_probe).is_tombstone
+        #         if tombstone is True:
+        #             self._size += 1
+        #
+        #         self._buckets.set_at_index(quadratic_probe, (HashEntry(key, value)))
+        #
+        #     counter += 1
 
     def table_load(self) -> float:
         """
@@ -147,10 +165,10 @@ class HashMap:
         empty_count = 0
         hash_capacity = self._capacity
 
-        for i in range(hash_capacity):
-            if self._buckets.get_at_index(i) is None:
+        for index in range(hash_capacity):
+            if self._buckets.get_at_index(index) is None or \
+                    self._buckets[index].is_tombstone is True:
                 empty_count += 1
-
         return empty_count
 
     def resize_table(self, new_capacity: int) -> None:
@@ -164,32 +182,27 @@ class HashMap:
 
         # TODO - comments
 
-        da = DynamicArray()
-
-        if new_capacity < 1:
+        if new_capacity < self._size:
             return
 
-        if new_capacity is None:
-            return
+        prime_capacity = self._is_prime(new_capacity)
+        next_prime = self._next_prime(new_capacity)
 
-        if not self._is_prime(new_capacity):
-            new_capacity = self._next_prime(new_capacity)
-
-        for i in range(new_capacity):
-            da.append(i)
-
-        for j in range(self._capacity):
-            if self._buckets.get_at_index(j) is None:
-                continue
-            elif self._buckets.get_at_index(j) is not None:
-                da.append(j)
+        if prime_capacity is not True:
+            new_capacity = next_prime
 
         self._capacity = new_capacity
-        self._buckets = da
+        buckets = self._buckets
+        self._buckets = DynamicArray()
         self._size = 0
 
-        for q in da:
-            self.put(q.key, q.value)
+        for index in range(new_capacity):
+            self._buckets.append(None)
+
+        for index in range(buckets.length()):
+            element = buckets.get_at_index(index)
+            if element is not None:
+                self.put(element.key, element.value)
 
     def get(self, key: str) -> object:
         """
@@ -210,7 +223,10 @@ class HashMap:
         if not self.contains_key(key):
             return None
 
-        else:
+        if self._buckets[hash_index].is_tombstone is True:
+            return None
+        elif self._buckets[hash_index].is_tombstone is False and \
+                self._buckets[hash_index] is not None:
             return self._buckets.get_at_index(hash_index)
 
     def contains_key(self, key: str) -> bool:
@@ -227,16 +243,18 @@ class HashMap:
         # This method returns True if the given key is in the hash map, otherwise it returns False. An
         # empty hash map does not contain any keys.
 
-        hash_function = self._hash_function(key)
-        hash_index = hash_function % self._capacity
+        capacity = self._capacity
 
         if self._capacity == 0:
             return False
 
-        if self._buckets.get_at_index(hash_index) == key:
-            return True
-        else:
-            return False
+        for index in range(capacity):
+            hash_function = self._hash_function(key)
+            hash_index = hash_function % self._capacity
+            if self._buckets.get_at_index(hash_index) == key and self._buckets[hash_index].is_tombstone is False:
+                return True
+            else:
+                return False
 
     def remove(self, key: str) -> None:
         """
@@ -249,13 +267,6 @@ class HashMap:
 
         # TODO - comments
 
-        # This method removes the given key and its associated value from the hash map. If the key
-        # is not in the hash map, the method does nothing (no exception needs to be raised).
-
-        # Now, when an element is removed, we insert the tombstone value.
-        # This value can be replaced when adding a new entry, since if there
-        # is any value there, it will not halt the search for an element.
-
         hash_function = self._hash_function(key)
         hash_index = hash_function % self._capacity
 
@@ -266,6 +277,7 @@ class HashMap:
             if self._buckets[hash_index].is_tombstone is True:
                 return None
             if self._buckets[hash_index].is_tombstone is False:
+                self._buckets.set_at_index(hash_index, None)
                 self._buckets[hash_index].is_tombstone = True
                 self._size -= 1
 
@@ -303,8 +315,9 @@ class HashMap:
         da = DynamicArray()
 
         for i in range(self._buckets.length()):
-            bucket = self._buckets.get_at_index(i)
-            da.append((i, bucket))
+            bucket = self._buckets[i]
+            if bucket is not None and bucket.is_tombstone is False:
+                da.append((bucket.key, bucket.value))
         return da
 
     def __iter__(self):

@@ -106,7 +106,7 @@ class HashMap:
             self.resize_table(new_capacity)
 
         hash_function = self._hash_function(key)
-        hash_index = hash_function % self._capacity
+        hash_index = hash_function % self.get_capacity()
 
         if self._buckets.get_at_index(hash_index).contains(key) is not None:
             self._buckets.get_at_index(hash_index).remove(key)
