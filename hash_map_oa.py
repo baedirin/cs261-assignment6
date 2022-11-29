@@ -251,7 +251,8 @@ class HashMap:
         for index in range(capacity):
             hash_function = self._hash_function(key)
             hash_index = hash_function % self._capacity
-            if self._buckets.get_at_index(hash_index) == key and self._buckets[hash_index].is_tombstone is False:
+            if self._buckets.get_at_index(hash_index) == key and\
+                    self._buckets[hash_index].is_tombstone is False:
                 return True
             else:
                 return False
