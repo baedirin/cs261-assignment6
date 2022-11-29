@@ -99,6 +99,8 @@ class HashMap:
         present in the hash table, it must be added.
         """
 
+        # TODO - comments, fix
+
         if self.table_load() >= 1:
             new_capacity = self._capacity * 2
             self.resize_table(new_capacity)
@@ -122,6 +124,8 @@ class HashMap:
         A function which returns the number
         of empty buckets in the hash table.
         """
+
+        # TODO - comments, fix
 
         empty_count = 0
         hash_capacity = self._capacity
@@ -150,9 +154,14 @@ class HashMap:
         table capacity.
         """
 
-        # Simply set the buckets to a new dynamic array to clear.
+        # TODO - comments, fix
 
-        self._buckets = DynamicArray()
+        ll = LinkedList()
+        capacity = self._capacity
+
+        for i in range(0, capacity):
+            self._buckets.set_at_index(i, ll)
+            self._size = 0
 
     def resize_table(self, new_capacity: int) -> None:
         """
@@ -165,6 +174,8 @@ class HashMap:
         to one. If less than 1, nothing
         occurs.
         """
+
+        # TODO - comments, fix
 
         ll = LinkedList()
         da = DynamicArray()
@@ -202,6 +213,8 @@ class HashMap:
         the function returns None.
         """
 
+        # TODO - comments, fix
+
         hash_function = self._hash_function(key)
         hash_index = hash_function % self._capacity
 
@@ -218,6 +231,8 @@ class HashMap:
         key is in the hash table. An empty
         hash table will not contain any keys.
         """
+
+        # TODO - comments, fix
 
         hash_function = self._hash_function(key)
         hash_index = hash_function % self._capacity
@@ -238,6 +253,8 @@ class HashMap:
         exist in the hash table, nothing occurs.
         """
 
+        # TODO - comments, fix
+
         hash_function = self._hash_function(key)
         hash_index = hash_function % self._capacity
 
@@ -256,6 +273,8 @@ class HashMap:
         table. Order does not matter.
         """
 
+        # TODO - comments, fix
+
         da = DynamicArray()
 
         for i in range(self._buckets.length()):
@@ -271,6 +290,8 @@ def find_mode(da: DynamicArray) -> (DynamicArray, int):
     # if you'd like to use a hash map,
     # use this instance of your Separate Chaining HashMap
     map = HashMap()
+
+    # TODO - comments, write function
 
     # Write a standalone function outside the HashMap class that receives a dynamic array
     # (that is not guaranteed to be sorted). This function will return a tuple containing, in this
