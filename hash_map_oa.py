@@ -88,66 +88,255 @@ class HashMap:
 
     def put(self, key: str, value: object) -> None:
         """
+        A function which updates the
+        key/value pair in a hash map.
+        If a value already exists in the
+        hash map, it must be replaced. If a
+        key is not present, it must be
+        put into the hash map.
         """
 
-        pass
+        # TODO - comments
+
+        if self.table_load() >= .5:
+            new_capacity = self._capacity * 2
+            self.resize_table(new_capacity)
+
+        hash_function = self._hash_function(key)
+        hash_index = hash_function % self._capacity
+
+        # 1. Use the hash function to compute an initial index for the element.
+        # 2. If the hash table array at index initial is empty, insert the element there and stop.
+        # 3. Otherwise, compute the next index i in the probing sequence and repeat.
+
+        # Quadratic probing:  i = i initial + j^2 % m            (where j = 1, 2, 3, …)
+
+        for j in range(self._buckets.length()):
+            quadratic_probe = (hash_index + (j * j)) % self._capacity
+
+            if self._buckets.get_at_index(hash_index) is None:
+                self._buckets.set_at_index(hash_index, value)
+                self._size = self._size + 1
+
+            elif self._buckets.get_at_index(hash_index) is not None:
+                if self._buckets[quadratic_probe] is None:
+                    self._buckets.set_at_index(hash_index, value)
+                    self._size = self._size + 1
+                elif self._buckets[quadratic_probe] is not None:
+                    j += 1
 
     def table_load(self) -> float:
         """
+        A function that returns the
+        hash table load factor.
         """
-        pass
+
+        # Return the size divided by the capacity for the load factor.
+
+        return self._size / self._capacity
 
     def empty_buckets(self) -> int:
         """
+        A function that returns the
+        number of empty buckets in the
+        hash table.
         """
-        pass
+
+        # TODO - comments
+
+        empty_count = 0
+        hash_capacity = self._capacity
+
+        for i in range(hash_capacity):
+            if self._buckets.get_at_index(i) is None:
+                empty_count += 1
+
+        return empty_count
 
     def resize_table(self, new_capacity: int) -> None:
         """
-        TODO: Write this implementation
+        A function that changes the
+        internal capacity of the hash table.
+        All key/value pairs must remain in
+        the new hash map and the links must
+        be rehashed.
         """
 
-        pass
+        # TODO - comments
+
+        da = DynamicArray()
+
+        if new_capacity < 1:
+            return
+
+        if new_capacity is None:
+            return
+
+        if not self._is_prime(new_capacity):
+            new_capacity = self._next_prime(new_capacity)
+
+        for i in range(new_capacity):
+            da.append(i)
+
+        for j in range(self._capacity):
+            if self._buckets.get_at_index(j) is None:
+                continue
+            elif self._buckets.get_at_index(j) is not None:
+                da.append(j)
+
+        self._capacity = new_capacity
+        self._buckets = da
+        self._size = 0
+
+        for q in da:
+            self.put(q.key, q.value)
 
     def get(self, key: str) -> object:
         """
+        A function that returns the value
+        of the key passed. If the key is
+        not present in the hash map, it
+        returns None.
         """
 
-        pass
+        # TODO - comments
+
+        # This method returns the value associated with the given key. If the key is not in the hash
+        # map, the method returns None.
+
+        hash_function = self._hash_function(key)
+        hash_index = hash_function % self._capacity
+
+        if not self.contains_key(key):
+            return None
+
+        else:
+            return self._buckets.get_at_index(hash_index)
 
     def contains_key(self, key: str) -> bool:
         """
+        A function that returns True if
+        a passed key is present in the
+        hash map. Otherwise, it returns
+        False. If the hash map is empty.
+        it returns no keys.
         """
 
-        pass
+        # TODO - comments
+
+        # This method returns True if the given key is in the hash map, otherwise it returns False. An
+        # empty hash map does not contain any keys.
+
+        hash_function = self._hash_function(key)
+        hash_index = hash_function % self._capacity
+
+        if self._capacity == 0:
+            return False
+
+        if self._buckets.get_at_index(hash_index) == key:
+            return True
+        else:
+            return False
 
     def remove(self, key: str) -> None:
         """
+        A function that removes the key
+        passed, plus the value associated
+        with that key. If the key passed
+        is not present in the hash map,
+        the function does nothing.
         """
 
-        pass
+        # TODO - comments
+
+        # This method removes the given key and its associated value from the hash map. If the key
+        # is not in the hash map, the method does nothing (no exception needs to be raised).
+
+        # Now, when an element is removed, we insert the tombstone value.
+        # This value can be replaced when adding a new entry, since if there
+        # is any value there, it will not halt the search for an element.
+
+        hash_function = self._hash_function(key)
+        hash_index = hash_function % self._capacity
+
+        if not self.contains_key(key):
+            return None
+
+        if self._buckets.get_at_index(hash_index) == key:
+            if self._buckets[hash_index].is_tombstone is True:
+                return None
+            if self._buckets[hash_index].is_tombstone is False:
+                self._buckets[hash_index].is_tombstone = True
+                self._size -= 1
 
     def clear(self) -> None:
         """
+        A function that clears the
+        contents of the underlying
+        hash map, without changing the
+        underlying capacity.
         """
-        pass
+
+        # TODO - comments
+
+        da = DynamicArray()
+        capacity = da.length()
+
+        for i in range(0, capacity):
+            self._buckets.set_at_index(i, da)
+            self._size = 0
 
     def get_keys_and_values(self) -> DynamicArray:
         """
+        A function that returns a
+        dynamic array where each element
+        contains a tuple containing a
+        key/value pair. Order does not
+        matter.
         """
 
-        pass
+        # TODO - comments
+
+        # This method returns a dynamic array where each index contains a tuple of a key/value pair
+        # stored in the hash map. The order of the keys in the dynamic array does not matter.
+
+        da = DynamicArray()
+
+        for i in range(self._buckets.length()):
+            bucket = self._buckets.get_at_index(i)
+            da.append((i, bucket))
+        return da
 
     def __iter__(self):
         """
-        TODO: Write this implementation
+        A function that allows the hash
+        map to iterate across itself.
         """
+
+        # TODO - comments
+
+        # This method enables the hash map to iterate across itself. Implement this method in a
+        # similar way to the example in the Exploration: Encapsulation and Iterators.
+        # You ARE permitted (and will need to) initialize a variable to track the iterator’s progress
+        # through the hash map’s contents.
+        # You can use either of the two models demonstrated in the Exploration - you can build the
+        # iterator functionality inside the HashMap class, or you can create a separate iterator class.
+
         pass
 
     def __next__(self):
         """
-        TODO: Write this implementation
+        A function that returns the next
+        item in the hash map, based upon
+        the current location of the iterator.
         """
+
+        # TODO - comments
+
+        # This method will return the next item in the hash map, based on the current location of the
+        # iterator. Implement this method in a similar way to the example in the Exploration:
+        # Encapsulation and Iterators. It will need to only iterate over active items.
+
         pass
 
 
