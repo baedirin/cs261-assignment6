@@ -102,46 +102,45 @@ class HashMap:
             new_capacity = self._capacity * 2
             self.resize_table(new_capacity)
 
-        hash_index = self._hash_function(key) % self.get_capacity()
-        counter = 0
-
-        while self._buckets[hash_index]:
-            if self._buckets[hash_index].key == key or \
-                    self._buckets[hash_index].is_tombstone is True:
-                break
-            counter += 1
-            index = hash_index
-            hash_index = (index + (counter * counter)) % self.get_capacity()
-
-        if self._buckets[hash_index] is None:
-            self._buckets[hash_index] = HashEntry(key, value)
-            self._size += 1
-
-        elif self._buckets[hash_index] is not None:
-            if self._buckets[hash_index].key == key:
-                self._buckets[hash_index].value = value
-            if self._buckets[hash_index].is_tombstone is True:
-                self._buckets[hash_index] = HashEntry(key, value)
-
-        # hash_func = self._hash_function(key)
-        # empty = False
+        # hash_index = self._hash_function(key) % self.get_capacity()
         # counter = 0
         #
-        # while not empty:
-        #     quadratic_probe = ((hash_func + (counter * counter)) % self.get_capacity())
-        #     if self._buckets.get_at_index(quadratic_probe) is None:
-        #         empty = True
-        #         self._buckets.set_at_index(quadratic_probe, (HashEntry(key, value)))
-        #         self._size += 1
-        #     elif self._buckets.get_at_index(quadratic_probe).key == key:
-        #         empty = True
-        #         tombstone = self._buckets.get_at_index(quadratic_probe).is_tombstone
-        #         if tombstone is True:
-        #             self._size += 1
-        #
-        #         self._buckets.set_at_index(quadratic_probe, (HashEntry(key, value)))
-        #
+        # while self._buckets[hash_index]:
+        #     if self._buckets[hash_index].key == key or \
+        #             self._buckets[hash_index].is_tombstone is True:
+        #         break
         #     counter += 1
+        #     index = hash_index
+        #     hash_index = (index + (counter * counter)) % self.get_capacity()
+        #
+        # if self._buckets[hash_index] is None:
+        #     self._buckets[hash_index] = HashEntry(key, value)
+        #     self._size += 1
+        #
+        # elif self._buckets[hash_index] is not None:
+        #     if self._buckets[hash_index].key == key:
+        #         self._buckets[hash_index].value = value
+        #     if self._buckets[hash_index].is_tombstone is True:
+        #         self._buckets[hash_index] = HashEntry(key, value)
+
+        hash_func = self._hash_function(key)
+        empty = False
+        counter = 0
+
+        while not empty:
+            quadratic_probe = ((hash_func + (counter * counter)) % self.get_capacity())
+            if self._buckets.get_at_index(quadratic_probe) is None:
+                empty = True
+                self._buckets.set_at_index(quadratic_probe, (HashEntry(key, value)))
+                self._size += 1
+            elif self._buckets.get_at_index(quadratic_probe).key == key:
+                empty = True
+                tombstone = self._buckets.get_at_index(quadratic_probe).is_tombstone
+                if tombstone is True:
+                    self._size += 1
+                self._buckets.set_at_index(quadratic_probe, (HashEntry(key, value)))
+
+            counter += 1
 
     def table_load(self) -> float:
         """
