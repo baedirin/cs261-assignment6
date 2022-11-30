@@ -163,7 +163,7 @@ class HashMap:
 
         # TODO - comments
 
-        da = DynamicArray
+        da = DynamicArray()
 
         if new_capacity < self.get_size():
             return
@@ -328,17 +328,11 @@ class HashMap:
         A function that allows the hash
         map to iterate across itself.
         """
-
         # TODO - comments
 
-        # This method enables the hash map to iterate across itself. Implement this method in a
-        # similar way to the example in the Exploration: Encapsulation and Iterators.
-        # You ARE permitted (and will need to) initialize a variable to track the iterator’s progress
-        # through the hash map’s contents.
-        # You can use either of the two models demonstrated in the Exploration - you can build the
-        # iterator functionality inside the HashMap class, or you can create a separate iterator class.
+        self._index = 0
 
-        pass
+        return self
 
     def __next__(self):
         """
@@ -346,15 +340,18 @@ class HashMap:
         item in the hash map, based upon
         the current location of the iterator.
         """
-
         # TODO - comments
 
-        # This method will return the next item in the hash map, based on the current location of the
-        # iterator. Implement this method in a similar way to the example in the Exploration:
-        # Encapsulation and Iterators. It will need to only iterate over active items.
+        try:
+            value = self._buckets[self._index]
+            while value is None or value.is_tombstone is True:
+                self._index += 1
+                value = self._buckets[self._index]
+        except DynamicArrayException:
+            raise StopIteration
 
-        pass
-
+        self._index += 1
+        return value
 
 # ------------------- BASIC TESTING ---------------------------------------- #
 

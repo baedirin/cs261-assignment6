@@ -330,9 +330,61 @@ def find_mode(da: DynamicArray) -> (DynamicArray, int):
     """
     TODO: Write this implementation
     """
-    # if you'd like to use a hash map,
-    # use this instance of your Separate Chaining HashMap
-    map = HashMap()
+
+    frequency = 1
+    current_mode = da[0]
+    highest_frequency = 1
+    return_da = DynamicArray()
+
+    # Begin by iterating through the length of the original array minus one
+
+    for index in range(da.length() - 1):
+
+    # If the length of the array is 0, append the mode to the dynamic array
+
+        if da.length() == 0:
+            return_da.append(current_mode)
+
+    # Check to see if the index is equal to the following index - if yes, increase
+    # the frequency by 1
+
+        if da[index] == da[index + 1]:
+            frequency += 1
+
+    # If the frequency is greater than the highest frequency, assign highest frequency
+    # to frequency. Current mode becomes the index we are on, and we instantiate a new
+    # dynamic array. Then, we append the current mode to the dynamic array.
+
+        if frequency > highest_frequency:
+            highest_frequency = frequency
+            current_mode = da[index]
+            return_da = DynamicArray()
+            return_da.append(current_mode)
+
+    # If the frequency is equal to the highest frequency, we make a check -
+    # if the frequency is not 1, and the index is not equal to the current mode,
+    # then the current mode becomes the index, and we append the mode to the
+    # dynamic array.
+
+        if frequency == highest_frequency:
+            if frequency != 1:
+                if da[index] != current_mode:
+                    current_mode = da[index]
+                    return_da.append(current_mode)
+
+    # If the index does not equal the following index, we reset the frequency counter.
+
+        if da[index] != da[index + 1]:
+            frequency = 1
+
+    # If the dynamic array is empty and the length is not 0, we append the
+    # indices of the original array to the dynamic array
+
+    if return_da.length() == 0 and da.length() != 0:
+        for index in range(da.length()):
+            return_da.append(da[index])
+
+    return (return_da, highest_frequency)
 
     # TODO - comments, write function
 
@@ -349,7 +401,7 @@ def find_mode(da: DynamicArray) -> (DynamicArray, int):
     # results, we recommend using the separate chaining hash map provided for you in the
     # function’s skeleton code.
 
-    pass
+
 
 
 # ------------------- BASIC TESTING ---------------------------------------- #
