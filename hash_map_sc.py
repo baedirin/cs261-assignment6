@@ -99,21 +99,30 @@ class HashMap:
         present in the hash table, it must be added.
         """
 
-        # TODO - comments, fix
-
+        # Begin by making a check if the table load is greater than
+        # or equal to 1. If yes, set the new capacity to twice the
+        # size, then resize the hash table according to the new capacity.
         if self.table_load() >= 1:
-            new_capacity = self._capacity * 2
+            new_capacity = self.get_capacity() * 2
             self.resize_table(new_capacity)
 
+        # Create a function for hashing, utilizing the hash function
+        # and the passed key. Then, use this function modulo the
+        # capacity to create a hash index.
         hash_function = self._hash_function(key)
         hash_index = hash_function % self.get_capacity()
 
+        # Then, make a check to see if the passed key at the hash index is not None.
+        # In such a case, we must replace the value by removing the old key, and then
+        # inserting the new key and value. Then, decrement the size.
         if self._buckets.get_at_index(hash_index).contains(key) is not None:
             self._buckets.get_at_index(hash_index).remove(key)
             self._buckets.get_at_index(hash_index).insert(key, value)
 
             self._size = self._size - 1
 
+        # Otherwise, if the passed key at the hash index is None, we simply
+        # insert the key and value, without any removal. Increment the size.
         elif self._buckets.get_at_index(hash_index).contains(key) is None:
             self._buckets.get_at_index(hash_index).insert(key, value)
 
@@ -125,12 +134,15 @@ class HashMap:
         of empty buckets in the hash table.
         """
 
-        # TODO - comments, fix
-
+        # Begin by creating a counter for the empty buckets,
+        # and a variable for the capacity.
         empty_count = 0
-        hash_capacity = self._capacity
+        hash_table_capacity = self.get_capacity()
 
-        for i in range(hash_capacity):
+        # Then, loop through the capacity, checking if the length at
+        # each index is 0. If yes, increment the counter. Then, return
+        # the counter.
+        for i in range(hash_table_capacity):
             if self._buckets.get_at_index(i).length() == 0:
                 empty_count += 1
 
@@ -144,7 +156,7 @@ class HashMap:
 
         # Return the size divided by the capacity for the load factor.
 
-        return self._size / self._capacity
+        return self.get_size() / self.get_capacity()
 
     def clear(self) -> None:
         """
@@ -154,12 +166,14 @@ class HashMap:
         table capacity.
         """
 
-        # TODO - comments, fix
-
+        # Begin by creating linked list and hash table capacity variables.
         ll = LinkedList()
-        capacity = self._capacity
+        hash_table_capacity = self.get_capacity()
 
-        for i in range(0, capacity):
+        # Then, loop through the hash table capacity, setting the index
+        # i with the value of the linked list. Set the size to 0 to fully
+        # clear the hash table.
+        for i in range(hash_table_capacity):
             self._buckets.set_at_index(i, ll)
             self._size = 0
 
@@ -175,35 +189,47 @@ class HashMap:
         occurs.
         """
 
-        # TODO - comments, fix
-
-        ll = LinkedList()
-        da = DynamicArray()
-
+        # Begin by making a check to see if the new capacity
+        # passed is less than 1. If yes, return, as this is an
+        # invalid capacity to resize.
         if new_capacity < 1:
             return
 
+        # Create variables for a linked list and dynamic array to use.
+        ll = LinkedList()
+        da = DynamicArray()
+
+        # Make a check if the new capacity is not prime - if it
+        # is not, then set the new capacity to the next prime of
+        # new capacity.
         if not self._is_prime(new_capacity):
             new_capacity = self._next_prime(new_capacity)
 
+        # Looping through the length of the new capacity, append
+        # the linked list to the dynamic array.
         for i in range(new_capacity):
             da.append(LinkedList())
 
-        for j in range(self._capacity):
-            node = self._buckets.get_at_index(j)
-
-            if self._buckets.get_at_index(j) is None:
+        # Then, loop through the capacity, creating a node to add
+        # for each bucket at index of buckets. If the bucket is None,
+        # continue. Otherwise, if the bucket is not None, insert this
+        # node into the linked list.
+        for bucket in range(self.get_capacity()):
+            node_to_add = self._buckets.get_at_index(bucket)
+            if node_to_add is None:
                 continue
-            elif self._buckets.get_at_index(j) is not None:
-                for k in node:
-                    ll.insert(k.key, k.value)
+            elif node_to_add is not None:
+                for node in node_to_add:
+                    ll.insert(node.key, node.value)
 
-        self._capacity = new_capacity
-        self._buckets = da
+        # Set size to 0, buckets to da, and capacity to new capacity. Then,
+        # put each key and value into each node of the linked list.
         self._size = 0
+        self._buckets = da
+        self._capacity = new_capacity
 
-        for q in ll:
-            self.put(q.key, q.value)
+        for node in ll:
+            self.put(node.key, node.value)
 
     def get(self, key: str):
         """
@@ -213,14 +239,19 @@ class HashMap:
         the function returns None.
         """
 
-        # TODO - comments, fix
-
+        # Create a function for hashing, utilizing the hash function
+        # and the passed key. Then, use this function modulo the
+        # capacity to create a hash index.
         hash_function = self._hash_function(key)
-        hash_index = hash_function % self._capacity
+        hash_index = hash_function % self.get_capacity()
 
+        # Make a check to see that the key exists. If not,
+        # return None, as the key is not in the hash table.
         if not self.contains_key(key):
             return None
 
+        # Otherwise, return the value of the key passed, utilizing the hash
+        # index.
         else:
             return self._buckets.get_at_index(hash_index).contains(key).value
 
@@ -232,14 +263,19 @@ class HashMap:
         hash table will not contain any keys.
         """
 
-        # TODO - comments, fix
-
+        # Create a function for hashing, utilizing the hash function
+        # and the passed key. Then, use this function modulo the
+        # capacity to create a hash index.
         hash_function = self._hash_function(key)
-        hash_index = hash_function % self._capacity
+        hash_index = hash_function % self.get_capacity()
 
-        if self._capacity == 0:
+        # Make a check to see if the capacity is 0. If yes,
+        # return False, as no keys are in the hash table.
+        if self.get_capacity() == 0:
             return False
 
+        # Otherwise, if the passed key is at the hash index, return True.
+        # Otherwise, return False.
         if self._buckets.get_at_index(hash_index).contains(key):
             return True
         else:
@@ -253,14 +289,18 @@ class HashMap:
         exist in the hash table, nothing occurs.
         """
 
-        # TODO - comments, fix
-
+        # Create a function for hashing, utilizing the hash function
+        # and the passed key. Then, use this function modulo the
+        # capacity to create a hash index.
         hash_function = self._hash_function(key)
-        hash_index = hash_function % self._capacity
+        hash_index = hash_function % self.get_capacity()
 
+        # Make a check to see if the key is within the hash
+        # table to remove. If no, then return.
         if not self.contains_key(key):
             return
-
+        # In the case that the passed key is at the hash index,
+        # remove that key and decrease the size by 1.
         if self._buckets.get_at_index(hash_index).contains(key):
             self._buckets.get_at_index(hash_index).remove(key)
             self._size -= 1
@@ -273,10 +313,13 @@ class HashMap:
         table. Order does not matter.
         """
 
-        # TODO - comments, fix
-
+        # Create a new dynamic array to append to and return.
         da = DynamicArray()
 
+        # Then, looping through the length of the buckets,
+        # set a variable buckets to the index of each. Looping again
+        # through the buckets, append each key and corresponding value to
+        # the dynamic array, which will be returned.
         for i in range(self._buckets.length()):
             buckets = self._buckets[i]
             for j in buckets:

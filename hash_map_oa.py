@@ -96,10 +96,11 @@ class HashMap:
         put into the hash map.
         """
 
-        # TODO - comments
-
+        # Begin by making a check if the table load is greater than
+        # or equal to 0.5. If yes, set the new capacity to twice the
+        # size, then resize the hash table according to the new capacity.
         if self.table_load() >= 0.5:
-            new_capacity = self._capacity * 2
+            new_capacity = self.get_capacity() * 2
             self.resize_table(new_capacity)
 
         probe_counter = 0
@@ -131,7 +132,7 @@ class HashMap:
 
         # Return the size divided by the capacity for the load factor.
 
-        return self._size / self._capacity
+        return self.get_size() / self.get_capacity()
 
     def empty_buckets(self) -> int:
         """
@@ -143,7 +144,7 @@ class HashMap:
         # TODO - comments
 
         empty_count = 0
-        hash_capacity = self._capacity
+        hash_capacity = self.get_capacity()
 
         for index in range(hash_capacity):
             if self._buckets.get_at_index(index) is None or \
@@ -164,24 +165,28 @@ class HashMap:
 
         da = DynamicArray
 
-        if new_capacity < self._size:
+        if new_capacity < self.get_size():
             return
 
+        # Make a check if the new capacity is not prime - if it
+        # is not, then set the new capacity to the next prime of
+        # new capacity.
         if not self._is_prime(new_capacity):
             new_capacity = self._next_prime(new_capacity)
 
+        self._size = 0
         self._capacity = new_capacity
         buckets = self._buckets
         self._buckets = DynamicArray()
-        self._size = 0
 
         for index in range(new_capacity):
             self._buckets.append(None)
 
         for index in range(buckets.length()):
             element = buckets.get_at_index(index)
-            if element is not None and buckets[index].is_tombstone is False:
-                self.put(element.key, element.value)
+            if element is not None:
+                if buckets[index].is_tombstone is False:
+                    self.put(element.key, element.value)
 
     def get(self, key: str) -> object:
         """
@@ -255,22 +260,11 @@ class HashMap:
 
         # TODO - comments
 
-        # hash_function = self._hash_function(key)
-        # hash_index = hash_function % self._capacity
-        #
-        # if not self.contains_key(key):
-        #     return None
-        #
-        # if self._buckets.get_at_index(hash_index) == key:
-        #     if self._buckets[hash_index].is_tombstone is True:
-        #         return None
-        #     if self._buckets[hash_index].is_tombstone is False:
-        #         self._buckets.set_at_index(hash_index, None)
-        #         self._buckets[hash_index].is_tombstone = True
-        #         self._size -= 1
+        if self.get_size() == 0:
+            return
 
         if not self.contains_key(key):
-            return None
+            return
 
         probe_counter = 0
         empty = False
@@ -280,12 +274,19 @@ class HashMap:
 
             quadratic_probe = ((hash_func + (probe_counter * probe_counter)) % self.get_capacity())
 
-            if self._buckets.get_at_index(quadratic_probe) is None or \
-                    self._buckets.get_at_index(quadratic_probe).is_tombstone is True:
-                continue
-            elif self._buckets.get_at_index(quadratic_probe).key == key:
-                self._buckets.set_at_index(quadratic_probe, None)
+            if self._buckets.get_at_index(quadratic_probe).key == key:
+                if self._buckets.get_at_index(quadratic_probe) is True:
+                    return
+                self._buckets.get_at_index(quadratic_probe).is_tombstone = True
+                self._buckets.set_at_index(quadratic_probe, self._buckets.get_at_index(quadratic_probe))
                 self._size -= 1
+                return
+
+            if self._buckets.get_at_index(quadratic_probe) is None:
+                return
+
+            if self._buckets.length() <= quadratic_probe:
+                return
 
             probe_counter += 1
 
@@ -299,10 +300,8 @@ class HashMap:
 
         # TODO - comments
 
-        capacity = self._capacity
-
-        for i in range(capacity):
-            self._buckets.set_at_index(i, self._buckets)
+        for index in range(self._buckets.length()):
+            self._buckets.set_at_index(index, None)
             self._size = 0
 
     def get_keys_and_values(self) -> DynamicArray:
@@ -318,8 +317,8 @@ class HashMap:
 
         da = DynamicArray()
 
-        for i in range(self._buckets.length()):
-            bucket = self._buckets[i]
+        for index in range(self._buckets.length()):
+            bucket = self._buckets.get_at_index(index)
             if bucket is not None and bucket.is_tombstone is False:
                 da.append((bucket.key, bucket.value))
         return da
