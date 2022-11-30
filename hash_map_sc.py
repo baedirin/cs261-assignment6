@@ -326,6 +326,7 @@ class HashMap:
                 da.append((j.key, j.value))
         return da
 
+
 def find_mode(da: DynamicArray) -> (DynamicArray, int):
     """
     TODO: Write this implementation
@@ -333,69 +334,32 @@ def find_mode(da: DynamicArray) -> (DynamicArray, int):
 
     frequency = 1
     current_mode = da[0]
-    highest_frequency = 1
     return_da = DynamicArray()
     map = HashMap()
 
-    # If the length of the array is 0, append the mode to the dynamic array
     if da.length() == 0:
         return_da.append(current_mode)
 
+    for bucket in range(da.length()):
+        node_to_add = da.get_at_index(bucket)
+        if node_to_add is not None:
+            for node in node_to_add:
+                map.put(node.key, node.value)
 
-
-    # Begin by iterating through the length of the original array minus one
-    for index in range(da.length() - 1):
-
-    # Check to see if the index is equal to the following index - if yes, increase
-    # the frequency by 1
-        if da[index] == da[index + 1]:
-            frequency += 1
-
-    # If the frequency is greater than the highest frequency, assign highest frequency
-    # to frequency. Current mode becomes the index we are on, and we instantiate a new
-    # dynamic array. Then, we append the current mode to the dynamic array.
-        if frequency > highest_frequency:
-            highest_frequency = frequency
+    for index in range(1, da.length()):
+        if map.contains_key(da[index]):
+            map.put(da[index], map.get(da[index]) + 1)
+            current_mode = da[index]
+        if not map.contains_key(da[index]):
+            map.put(da[index], 1)
+        if frequency > current_mode:
             current_mode = da[index]
             return_da = DynamicArray()
-            return_da.append(current_mode)
-
-    # If the frequency is equal to the highest frequency, we make a check -
-    # if the frequency is not 1, and the index is not equal to the current mode,
-    # then the current mode becomes the index, and we append the mode to the
-    # dynamic array.
-        if frequency == highest_frequency:
-            if frequency != 1:
-                if da[index] != current_mode:
-                    current_mode = da[index]
-                    return_da.append(current_mode)
-
-    # If the index does not equal the following index, we reset the frequency counter.
-        if da[index] != da[index + 1]:
-            frequency = 1
-
-    # If the dynamic array is empty and the length is not 0, we append the
-    # indices of the original array to the dynamic array
-    if return_da.length() == 0 and da.length() != 0:
-        for index in range(da.length()):
+        if frequency == current_mode:
             return_da.append(da[index])
 
-    return return_da, highest_frequency
+    return return_da, frequency
 
-    # TODO - comments, write function
-
-    # Write a standalone function outside the HashMap class that receives a dynamic array
-    # (that is not guaranteed to be sorted). This function will return a tuple containing, in this
-    # order, a dynamic array comprising the mode (most occurring) value/s of the array, and an
-    # integer that represents the highest frequency (how many times they appear).
-    # If there is more than one value with the highest frequency, all values at that frequency
-    # should be included in the array being returned (the order does not matter). If there is only
-    # one mode, the dynamic array will only contain that value.
-    # You may assume that the input array will contain at least one element, and that all values
-    # stored in the array will be strings. You do not need to write checks for these conditions.
-    # For full credit, the function must be implemented with O(N) time complexity. For best
-    # results, we recommend using the separate chaining hash map provided for you in the
-    # function’s skeleton code.
 
 # ------------------- BASIC TESTING ---------------------------------------- #
 
