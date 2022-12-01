@@ -2,9 +2,12 @@
 # OSU Email: davisbr2@oregonstate.edu
 # Course: CS261 - Data Structures
 # Assignment: Assignment 6
-# Due Date: 12/2/2022 (However I requested 2 extra days, so 12/4/2022)
-# Description: A hashmap using chaining, with a dynamic array
-#              and linked list.
+# Due Date: 12/2/2022
+# Description: A hashmap using chaining, with a HashMap class
+#              that interacts with a dynamic array and linked
+#              list class, as well as an SLNode class. Several
+#              methods interact with one another to build the
+#              hash map, using chaining to handle collisions.
 
 
 from a6_include import (DynamicArray, LinkedList,
@@ -211,14 +214,11 @@ class HashMap:
             da.append(LinkedList())
 
         # Then, loop through the capacity, creating a node to add
-        # for each bucket at index of buckets. If the bucket is None,
-        # continue. Otherwise, if the bucket is not None, insert this
-        # node into the linked list.
+        # for each bucket at index of buckets. If the bucket is
+        # not None, insert this node into the linked list.
         for bucket in range(self.get_capacity()):
             node_to_add = self._buckets.get_at_index(bucket)
-            if node_to_add is None:
-                continue
-            elif node_to_add is not None:
+            if node_to_add is not None:
                 for node in node_to_add:
                     ll.insert(node.key, node.value)
 
@@ -329,36 +329,54 @@ class HashMap:
 
 def find_mode(da: DynamicArray) -> (DynamicArray, int):
     """
-    TODO: Write this implementation
+    A function that tracks multiple modes
+    within a hash map. The function will
+    track multiple modes via their values,
+    and return a tuple an array populated
+    with those modes, as well as the
+    frequency of the modes. This function
+    must use O(N) runtime complexity.
     """
 
-    frequency = 1
-    current_mode = da[0]
+    # This code was written referencing my find_mode from assignment 2.
+
+    # First, create variables for the highest frequency, a new dynamic array
+    # to populate with modes and return, and a hash map with the input array
+    # passed.
+    highest_frequency = 0
     return_da = DynamicArray()
-    map = HashMap()
+    map = HashMap(da.length())
 
-    if da.length() == 0:
-        return_da.append(current_mode)
+    # Then, looping through the length of the input dynamic array, create a key
+    # and value based upon the dynamic array. If the value exists, place the key
+    # and value plus 1 into the map. This map will serve as a "clip board" to track
+    # the occurrences plus frequency.
+    for index in range(da.length()):
 
-    for bucket in range(da.length()):
-        node_to_add = da.get_at_index(bucket)
-        if node_to_add is not None:
-            for node in node_to_add:
-                map.put(node.key, node.value)
+        key = da.get_at_index(index)
+        value = map.get(key)
 
-    for index in range(1, da.length()):
-        if map.contains_key(da[index]):
-            map.put(da[index], map.get(da[index]) + 1)
-            current_mode = da[index]
-        if not map.contains_key(da[index]):
-            map.put(da[index], 1)
-        if frequency > current_mode:
-            current_mode = da[index]
+        if value:
+            value += 1
+            map.put(key, value)
+    # Otherwise, set the value to 1 and place the key and value into the map.
+        else:
+            value = 1
+            map.put(key, value)
+
+    # Now, make comparisons to append to the dynamic array to be returned. If the
+    # value is greater than the highest frequency, reset the highest frequency to the
+    # value, as I did in assignment 2 find_mode. Create the dynamic array and append the
+    # key to it. If the value is equal to the highest frequency, simply append the key
+    # to the return dynamic array.
+        if value > highest_frequency:
+            highest_frequency = value
             return_da = DynamicArray()
-        if frequency == current_mode:
-            return_da.append(da[index])
+            return_da.append(key)
+        elif value == highest_frequency:
+            return_da.append(key)
 
-    return return_da, frequency
+    return return_da, highest_frequency
 
 
 # ------------------- BASIC TESTING ---------------------------------------- #

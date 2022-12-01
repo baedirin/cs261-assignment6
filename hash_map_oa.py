@@ -2,9 +2,12 @@
 # OSU Email: davisbr2@oregonstate.edu
 # Course: CS261 - Data Structures
 # Assignment: Assignment 6
-# Due Date: 12/2/2022  (However I requested 2 extra days, so 12/4/2022)
-# Description: A hashmap using opening addressing, with a
-#              dynamic array and linked list.
+# Due Date: 12/2/2022
+# Description: A hashmap that includes a HashMap class
+#              which interacts with a dynamic array and linked
+#              list class, as well as an SLNode class. Several
+#              methods interact with one another to build the
+#              hash map, using open addressing to handle collisions.
 
 from a6_include import (DynamicArray, DynamicArrayException, HashEntry,
                         hash_function_1, hash_function_2)
@@ -103,25 +106,35 @@ class HashMap:
             new_capacity = self.get_capacity() * 2
             self.resize_table(new_capacity)
 
+        # Set a probe counter to track the count for the quadratic probe function,
+        # plus a while loop condition boolean and the hash function with the passed
+        # key to use in the quadratic probing function.
         probe_counter = 0
         empty = False
         hash_func = self._hash_function(key)
 
+        # While not empty, set the quadratic probe function using the hash function, probe counter and capacity.
         while not empty:
 
             quadratic_probe = ((hash_func + (probe_counter * probe_counter)) % self.get_capacity())
 
+            # If the bucket at the index of the quadratic probe is None, we can put the
+            # key and value into the hash map and increase the size by 1.
             if self._buckets.get_at_index(quadratic_probe) is None:
                 empty = True
                 self._buckets.set_at_index(quadratic_probe, (HashEntry(key, value)))
                 self._size = self._size + 1
 
+            # If the bucket at the index of the quadratic probe matches the key, then
+            # we must make an additional check that the space is a Tombstone value. If
+            # yes, increment the size by 1. Then put the key and value into the hash map.
             if self._buckets.get_at_index(quadratic_probe).key == key:
                 empty = True
                 if self._buckets.get_at_index(quadratic_probe).is_tombstone is True:
                     self._size = self._size + 1
                 self._buckets.set_at_index(quadratic_probe, (HashEntry(key, value)))
 
+            # Increment the probe counter to keep the quadratic probe formula accurate.
             probe_counter += 1
 
     def table_load(self) -> float:
@@ -131,7 +144,6 @@ class HashMap:
         """
 
         # Return the size divided by the capacity for the load factor.
-
         return self.get_size() / self.get_capacity()
 
     def empty_buckets(self) -> int:
@@ -141,11 +153,13 @@ class HashMap:
         hash table.
         """
 
-        # TODO - comments
-
+        # Set a counter for the empty buckets and the capacity to loop through.
         empty_count = 0
         hash_capacity = self.get_capacity()
 
+        # Looping through the capacity, make a check if the index
+        # is none or the Tombstone value is True. If yes, increment
+        # the empty counter.
         for index in range(hash_capacity):
             if self._buckets.get_at_index(index) is None or \
                     self._buckets[index].is_tombstone is True:
@@ -161,10 +175,8 @@ class HashMap:
         be rehashed.
         """
 
-        # TODO - comments
-
-        da = DynamicArray()
-
+        # Make a check to see if the new capacity is less than the size.
+        # If yes, return.
         if new_capacity < self.get_size():
             return
 
@@ -174,14 +186,21 @@ class HashMap:
         if not self._is_prime(new_capacity):
             new_capacity = self._next_prime(new_capacity)
 
+        # Set the size to 0, the capacity to the new capacity,
+        # buckets to the buckets of the DA, and reset the dynamic array.
         self._size = 0
         self._capacity = new_capacity
         buckets = self._buckets
         self._buckets = DynamicArray()
 
+        # Looping through the new capacity, append None to the buckets, as
+        # is shown in the HashMap class.
         for index in range(new_capacity):
             self._buckets.append(None)
 
+        # Then, loop through the length of buckets, creating an element
+        # for each index. Then, if that element is not None, and it is not
+        # a Tombstone value, put that element into the dynamic array.
         for index in range(buckets.length()):
             element = buckets.get_at_index(index)
             if element is not None:
@@ -196,28 +215,37 @@ class HashMap:
         returns None.
         """
 
-        # TODO - comments
-
+        # Make a check to see if the key is within the dynamic array. If not,
+        # return None, as it cannot be obtained.
         if not self.contains_key(key):
             return None
 
+        # Set a probe counter to track the count for the quadratic probe function,
+        # plus a while loop condition boolean and the hash function with the passed
+        # key to use in the quadratic probing function.
         probe_counter = 0
         empty = False
         hash_func = self._hash_function(key)
 
+        # While not empty, set the quadratic probe function using the hash function, probe counter and capacity.
         while not empty:
 
             quadratic_probe = ((hash_func + (probe_counter * probe_counter)) % self.get_capacity())
 
+            # Make a check if the index is None or the index is a Tombstone value. If yes, increment
+            # the probe counter and return None, as there is no value to return at that key.
             if self._buckets.get_at_index(quadratic_probe) is None or \
                     self._buckets.get_at_index(quadratic_probe).is_tombstone is True:
                 probe_counter += 1
                 return None
 
+            # Otherwise, if the key matches the key passed, increment the probe counter
+            # and return the value at that index.
             elif self._buckets.get_at_index(quadratic_probe).key == key:
                 probe_counter += 1
                 return self._buckets.get_at_index(quadratic_probe).value
 
+            # Increment the probe counter to keep the quadratic probe function accurate.
             probe_counter += 1
 
     def contains_key(self, key: str) -> bool:
@@ -229,24 +257,32 @@ class HashMap:
         it returns no keys.
         """
 
-        # TODO - comments
-
+        # Set a probe counter to track the count for the quadratic probe function,
+        # plus a while loop condition boolean and the hash function with the passed
+        # key to use in the quadratic probing function.
         probe_counter = 0
         empty = False
         hash_func = self._hash_function(key)
 
+        # While not empty, set the quadratic probe function using the hash function, probe counter and capacity.
         while not empty:
 
             quadratic_probe = ((hash_func + (probe_counter * probe_counter)) % self.get_capacity())
 
+            # Make a check to see if the index is None. If yes, increment the probe counter
+            # and return False, as the value is not present.
             if self._buckets.get_at_index(quadratic_probe) is None:
                 probe_counter += 1
                 return False
+
+            # Otherwise, if the key matches the key passed and it is not a Tombstone
+            # value, return True, as the key is present within the hash map. Increment the probe counter.
             if self._buckets.get_at_index(quadratic_probe).key == key and \
                     self._buckets.get_at_index(quadratic_probe).is_tombstone is False:
                 probe_counter += 1
                 return True
 
+            # Increment the probe counter to keep the quadratic probe function accurate.
             probe_counter += 1
 
     def remove(self, key: str) -> None:
@@ -258,22 +294,32 @@ class HashMap:
         the function does nothing.
         """
 
-        # TODO - comments
-
+        # Make an initial check to see if the size is 0. If yes,
+        # return, as there is no key in the hash map to remove.
         if self.get_size() == 0:
             return
 
+        # Make an additional check to see that the key is within the hash map
+        # to be removed. If not, then return, as a key that is not present cannot
+        # be removed.
         if not self.contains_key(key):
             return
 
+        # Set a probe counter to track the count for the quadratic probe function,
+        # plus a while loop condition boolean and the hash function with the passed
+        # key to use in the quadratic probing function.
         probe_counter = 0
         empty = False
         hash_func = self._hash_function(key)
 
+        # While not empty, set the quadratic probe function using the hash function, probe counter and capacity.
         while not empty:
 
             quadratic_probe = ((hash_func + (probe_counter * probe_counter)) % self.get_capacity())
 
+            # If the key matches the key passed, and the index is true, return. Set the Tombstone
+            # value to true, set the index to the quadratic probe and the value, then decrement the
+            # size and return.
             if self._buckets.get_at_index(quadratic_probe).key == key:
                 if self._buckets.get_at_index(quadratic_probe) is True:
                     return
@@ -282,12 +328,16 @@ class HashMap:
                 self._size -= 1
                 return
 
+            # If the quadratic probe is None, return.
             if self._buckets.get_at_index(quadratic_probe) is None:
                 return
 
+            # If the length is less than or equal to the quadratic probe,
+            # return.
             if self._buckets.length() <= quadratic_probe:
                 return
 
+            # Increment the probe counter to keep the quadratic probe function accurate.
             probe_counter += 1
 
     def clear(self) -> None:
@@ -298,8 +348,9 @@ class HashMap:
         underlying capacity.
         """
 
-        # TODO - comments
-
+        # Looping the length of buckets, set the buckets at index
+        # to None and the size to 0 to clear the buckets without
+        # altering the underlying capacity.
         for index in range(self._buckets.length()):
             self._buckets.set_at_index(index, None)
             self._size = 0
@@ -313,10 +364,13 @@ class HashMap:
         matter.
         """
 
-        # TODO - comments
-
         da = DynamicArray()
 
+        # Looping through the length of the buckets, set a variable buckets
+        # to the index of each. A check is made to see if the current bucket
+        # is not None and is not a Tombstone value. Then, if not None and
+        # not a Tombstone, append the key and value of the bucket
+        # to the return dynamic array.
         for index in range(self._buckets.length()):
             bucket = self._buckets.get_at_index(index)
             if bucket is not None and bucket.is_tombstone is False:
@@ -328,8 +382,7 @@ class HashMap:
         A function that allows the hash
         map to iterate across itself.
         """
-        # TODO - comments
-
+        # As done in my bag DA assignment, set the index to 0 and return self.
         self._index = 0
 
         return self
@@ -340,8 +393,9 @@ class HashMap:
         item in the hash map, based upon
         the current location of the iterator.
         """
-        # TODO - comments
-
+        # Taking inspiration from my bag DA assignment, try the value of buckets
+        # at index. While this is None or the Tombstone value is True, increment
+        # the index. Reset value.
         try:
             value = self._buckets[self._index]
             while value is None or value.is_tombstone is True:
@@ -349,6 +403,8 @@ class HashMap:
                 value = self._buckets[self._index]
         except DynamicArrayException:
             raise StopIteration
+
+        # Increment the index and return.
 
         self._index += 1
         return value
