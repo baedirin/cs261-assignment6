@@ -274,7 +274,7 @@ class HashMap:
         probe_counter = 0
         hash_func = self._hash_function(key)
 
-        # While not empty, set the quadratic probe function using the hash function, probe counter and capacity.
+        # While empty is 0, set the quadratic probe function using the hash function, probe counter and capacity.
         # Create a bucket available variable for quadratic probe index.
         while empty == 0:
 
@@ -324,7 +324,7 @@ class HashMap:
         probe_counter = 0
         hash_func = self._hash_function(key)
 
-        # While not empty, set the quadratic probe function using the hash function, probe counter and capacity.
+        # While is 0, set the quadratic probe function using the hash function, probe counter and capacity.
         # Create a bucket available variable for quadratic probe index.
         while empty == 0:
 
@@ -387,8 +387,9 @@ class HashMap:
         # to the return dynamic array.
         for index in range(self._buckets.length()):
             bucket = self._buckets.get_at_index(index)
-            if bucket is not None and bucket.is_tombstone is False:
-                da.append((bucket.key, bucket.value))
+            if bucket:
+                if bucket.is_tombstone is False:
+                    da.append((bucket.key, bucket.value))
         return da
 
     def __iter__(self):
