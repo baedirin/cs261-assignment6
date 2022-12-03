@@ -99,6 +99,13 @@ class HashMap:
         put into the hash map.
         """
 
+        # Set a probe counter to track the count for the quadratic probe function,
+        # plus a while loop variable and the hash function with the passed
+        # key to use in the quadratic probing function.
+        empty = 0
+        probe_counter = 0
+        hash_func = self._hash_function(key)
+
         # Begin by making a check if the table load is greater than
         # or equal to 0.5. If yes, set the new capacity to twice the
         # size, then resize the hash table according to the new capacity.
@@ -106,33 +113,29 @@ class HashMap:
             new_capacity = self.get_capacity() * 2
             self.resize_table(new_capacity)
 
-        # Set a probe counter to track the count for the quadratic probe function,
-        # plus a while loop condition boolean and the hash function with the passed
-        # key to use in the quadratic probing function.
-        probe_counter = 0
-        empty = False
-        hash_func = self._hash_function(key)
-
-        # While not empty, set the quadratic probe function using the hash function, probe counter and capacity.
-        while not empty:
+        # While empty is 0, set the quadratic probe function using the hash function, probe counter and capacity.
+        # Create a bucket available variable for quadratic probe index, and a placement variable for the hash entry.
+        while empty == 0:
 
             quadratic_probe = ((hash_func + (probe_counter * probe_counter)) % self.get_capacity())
+            bucket_available = self._buckets.get_at_index(quadratic_probe)
+            placement = (HashEntry(key, value))
 
             # If the bucket at the index of the quadratic probe is None, we can put the
             # key and value into the hash map and increase the size by 1.
-            if self._buckets.get_at_index(quadratic_probe) is None:
-                empty = True
-                self._buckets.set_at_index(quadratic_probe, (HashEntry(key, value)))
+            if bucket_available is None:
+                empty = 1
+                self._buckets.set_at_index(quadratic_probe, placement)
                 self._size = self._size + 1
 
             # If the bucket at the index of the quadratic probe matches the key, then
             # we must make an additional check that the space is a Tombstone value. If
             # yes, increment the size by 1. Then put the key and value into the hash map.
-            if self._buckets.get_at_index(quadratic_probe).key == key:
-                empty = True
+            if key == self._buckets.get_at_index(quadratic_probe).key:
+                empty = 1
                 if self._buckets.get_at_index(quadratic_probe).is_tombstone is True:
                     self._size = self._size + 1
-                self._buckets.set_at_index(quadratic_probe, (HashEntry(key, value)))
+                self._buckets.set_at_index(quadratic_probe, placement)
 
             # Increment the probe counter to keep the quadratic probe formula accurate.
             probe_counter += 1
@@ -195,16 +198,16 @@ class HashMap:
 
         # Looping through the new capacity, append None to the buckets, as
         # is shown in the HashMap class.
-        for index in range(new_capacity):
+        for i in range(new_capacity):
             self._buckets.append(None)
 
         # Then, loop through the length of buckets, creating an element
         # for each index. Then, if that element is not None, and it is not
         # a Tombstone value, put that element into the dynamic array.
-        for index in range(buckets.length()):
-            element = buckets.get_at_index(index)
-            if element is not None:
-                if buckets[index].is_tombstone is False:
+        for j in range(buckets.length()):
+            element = buckets.get_at_index(j)
+            if element:
+                if buckets[j].is_tombstone is False:
                     self.put(element.key, element.value)
 
     def get(self, key: str) -> object:
@@ -220,28 +223,35 @@ class HashMap:
         if not self.contains_key(key):
             return None
 
+        # Make an additional check to see if the size is less than 1. If yes,
+        # return, as there is no key in the hash map to remove.
+        if self._buckets.length() < 1:
+            return None
+
         # Set a probe counter to track the count for the quadratic probe function,
-        # plus a while loop condition boolean and the hash function with the passed
+        # plus a while loop variable and the hash function with the passed
         # key to use in the quadratic probing function.
+        empty = 0
         probe_counter = 0
-        empty = False
         hash_func = self._hash_function(key)
 
-        # While not empty, set the quadratic probe function using the hash function, probe counter and capacity.
-        while not empty:
+        # While empty is 0, set the quadratic probe function using the hash function, probe counter and capacity.
+        # Create a bucket available variable for quadratic probe index.
+        while empty == 0:
 
             quadratic_probe = ((hash_func + (probe_counter * probe_counter)) % self.get_capacity())
+            bucket_available = self._buckets.get_at_index(quadratic_probe)
 
             # Make a check if the index is None or the index is a Tombstone value. If yes, increment
             # the probe counter and return None, as there is no value to return at that key.
-            if self._buckets.get_at_index(quadratic_probe) is None or \
+            if bucket_available is None or \
                     self._buckets.get_at_index(quadratic_probe).is_tombstone is True:
                 probe_counter += 1
                 return None
 
             # Otherwise, if the key matches the key passed, increment the probe counter
             # and return the value at that index.
-            elif self._buckets.get_at_index(quadratic_probe).key == key:
+            elif key == self._buckets.get_at_index(quadratic_probe).key:
                 probe_counter += 1
                 return self._buckets.get_at_index(quadratic_probe).value
 
@@ -258,26 +268,28 @@ class HashMap:
         """
 
         # Set a probe counter to track the count for the quadratic probe function,
-        # plus a while loop condition boolean and the hash function with the passed
+        # plus a while loop variable and the hash function with the passed
         # key to use in the quadratic probing function.
+        empty = 0
         probe_counter = 0
-        empty = False
         hash_func = self._hash_function(key)
 
         # While not empty, set the quadratic probe function using the hash function, probe counter and capacity.
-        while not empty:
+        # Create a bucket available variable for quadratic probe index.
+        while empty == 0:
 
             quadratic_probe = ((hash_func + (probe_counter * probe_counter)) % self.get_capacity())
+            bucket_available = self._buckets.get_at_index(quadratic_probe)
 
             # Make a check to see if the index is None. If yes, increment the probe counter
             # and return False, as the value is not present.
-            if self._buckets.get_at_index(quadratic_probe) is None:
+            if bucket_available is None:
                 probe_counter += 1
                 return False
 
             # Otherwise, if the key matches the key passed and it is not a Tombstone
             # value, return True, as the key is present within the hash map. Increment the probe counter.
-            if self._buckets.get_at_index(quadratic_probe).key == key and \
+            if key == self._buckets.get_at_index(quadratic_probe).key and \
                     self._buckets.get_at_index(quadratic_probe).is_tombstone is False:
                 probe_counter += 1
                 return True
@@ -294,42 +306,44 @@ class HashMap:
         the function does nothing.
         """
 
-        # Make an initial check to see if the size is 0. If yes,
-        # return, as there is no key in the hash map to remove.
-        if self.get_size() == 0:
-            return
-
-        # Make an additional check to see that the key is within the hash map
-        # to be removed. If not, then return, as a key that is not present cannot
-        # be removed.
+        # Make a check to see that the key is within the hash map
+        # to be removed. If not, then return, as a key that is not present
+        # cannot be removed from the hash map.
         if not self.contains_key(key):
-            return
+            return None
+
+        # Make an additional check to see if the size is less than 1. If yes,
+        # return, as there is no key in the hash map to remove.
+        if self._buckets.length() < 1:
+            return None
 
         # Set a probe counter to track the count for the quadratic probe function,
-        # plus a while loop condition boolean and the hash function with the passed
+        # plus a while loop variable and the hash function with the passed
         # key to use in the quadratic probing function.
+        empty = 0
         probe_counter = 0
-        empty = False
         hash_func = self._hash_function(key)
 
         # While not empty, set the quadratic probe function using the hash function, probe counter and capacity.
-        while not empty:
+        # Create a bucket available variable for quadratic probe index.
+        while empty == 0:
 
             quadratic_probe = ((hash_func + (probe_counter * probe_counter)) % self.get_capacity())
+            bucket_available = self._buckets.get_at_index(quadratic_probe)
 
             # If the key matches the key passed, and the index is true, return. Set the Tombstone
             # value to true, set the index to the quadratic probe and the value, then decrement the
             # size and return.
-            if self._buckets.get_at_index(quadratic_probe).key == key:
-                if self._buckets.get_at_index(quadratic_probe) is True:
+            if key == self._buckets.get_at_index(quadratic_probe).key:
+                if bucket_available is True:
                     return
                 self._buckets.get_at_index(quadratic_probe).is_tombstone = True
                 self._buckets.set_at_index(quadratic_probe, self._buckets.get_at_index(quadratic_probe))
-                self._size -= 1
+                self._size = self._size - 1
                 return
 
             # If the quadratic probe is None, return.
-            if self._buckets.get_at_index(quadratic_probe) is None:
+            if bucket_available is None:
                 return
 
             # If the length is less than or equal to the quadratic probe,
